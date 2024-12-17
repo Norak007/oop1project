@@ -1,0 +1,153 @@
+
+TrafficViolationSystemGUI.java
+// Bonus: This is the Traffic Violation System GUI interface
+import javax.swing.*;
+import java.awt.event.*;
+import java.util.*;
+
+public class TrafficViolationSystemGUI {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Traffic Violation System");
+        frame.setSize(400, 350);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(null);
+
+        JLabel label = new JLabel("Select User:");
+        label.setBounds(30, 20, 100, 25);
+
+        JComboBox<String> userComboBox = new JComboBox<>(new String[]{"Abdullah", "Sara"});
+        userComboBox.setBounds(140, 20, 150, 25);
+
+        JButton showVehiclesButton = new JButton("Show Vehicles");
+        showVehiclesButton.setBounds(30, 60, 150, 30);
+
+        JButton showViolationsButton = new JButton("Show Violations");
+        showViolationsButton.setBounds(190, 60, 150, 30);
+
+        JTextArea displayArea = new JTextArea();
+        displayArea.setBounds(30, 100, 310, 180);
+        displayArea.setEditable(false);
+
+        User user1 = new User("Abdullah");
+        user1.addVehicle(new Car(CarType.SUV, CarModel.BMW, "Black", "ABC123"));
+        user1.addVehicle(new Car(CarType.SEDAN, CarModel.LEXUS, "White", "DEF456"));
+        user1.addViolation(new TrafficViolation(ViolationType.REDLIGHT_CROSSING, CameraLocation.ABDULAZIZ_BIN_BAZ_STREET, user1.getVehicles().get(0)));
+
+        User user2 = new User("Sara");
+        user2.addVehicle(new Car(CarType.SPORTS_CAR, CarModel.MERCEDES, "Blue", "JKL012"));
+        user2.addViolation(new TrafficViolation(ViolationType.NO_INSURANCE, CameraLocation.OMAR_IBN_AL_KHATTAB_STREET, user2.getVehicles().get(0)));
+
+        showVehiclesButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                User selectedUser = userComboBox.getSelectedItem().equals("Abdullah") ? user1 : user2;
+                displayArea.setText("Vehicles owned by " + selectedUser.getName() + ":\n");
+                for (Vehicle v : selectedUser.getVehicles()) {
+                    displayArea.append("- " + v.getVehicleDetails() + "\n");
+                }
+            }
+        });
+
+        showViolationsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                User selectedUser = userComboBox.getSelectedItem().equals("Abdullah") ? user1 : user2;
+                displayArea.setText("Violations for " + selectedUser.getName() + ":\n");
+                if (selectedUser.getViolations().isEmpty()) {
+                    displayArea.append("No violations.\n");
+                } else {
+                    for (TrafficViolation violation : selectedUser.getViolations()) {
+                        displayArea.append("- " + violation.getViolationDetails() + "\n");
+                    }
+                }
+            }
+        });
+
+        frame.add(label);
+        frame.add(userComboBox);
+        frame.add(showVehiclesButton);
+        frame.add(showViolationsButton);
+        frame.add(displayArea);
+
+        frame.setVisible(true);
+    }
+}
+
+class Vehicle {
+    private String licensePlate;
+
+    public Vehicle(String licensePlate) {
+        this.licensePlate = licensePlate;
+    }
+
+    public String getVehicleDetails() {
+        return "License Plate: " + licensePlate;
+    }
+}
+
+class Car extends Vehicle {
+    private CarType carType;
+    private CarModel carModel;
+    private String color;
+
+    public Car(CarType carType, CarModel carModel, String color, String licensePlate) {
+        super(licensePlate);
+        this.carType = carType;
+        this.carModel = carModel;
+        this.color = color;
+    }
+
+    @Override
+    public String getVehicleDetails() {
+        return carType + ", " + carModel + ", " + color + ", " + super.getVehicleDetails();
+    }
+}
+
+class User {
+    private String name;
+    private List<Vehicle> vehicles = new ArrayList<>();
+    private List<TrafficViolation> violations = new ArrayList<>();
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public void addVehicle(Vehicle vehicle) {
+        vehicles.add(vehicle);
+    }
+
+    public void addViolation(TrafficViolation violation) {
+        violations.add(violation);
+    }
+
+    public List<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
+    public List<TrafficViolation> getViolations() {
+        return violations;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+class TrafficViolation {
+    private ViolationType violationType;
+    private CameraLocation location;
+    private Vehicle vehicle;
+
+    public TrafficViolation(ViolationType violationType, CameraLocation location, Vehicle vehicle) {
+        this.violationType = violationType;
+        this.location = location;
+        this.vehicle = vehicle;
+    }
+
+    public String getViolationDetails() {
+        return violationType + ", " + location + ", Vehicle: " + vehicle.getVehicleDetails();
+    }
+}
+
+enum CarType { SUV, SEDAN, SPORTS_CAR }
+enum CarModel { BMW, LEXUS, MERCEDES }
+enum ViolationType { REDLIGHT_CROSSING, NO_INSURANCE }
+enum CameraLocation { ABDULAZIZ_BIN_BAZ_STREET, OMAR_IBN_AL_KHATTAB_STREET }
